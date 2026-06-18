@@ -14,8 +14,10 @@ public class CustomerTrackingFrame extends JFrame {
 
         setTitle("Tracking Pesanan");
 
-        setSize(700, 500);
-
+                setExtendedState(JFrame.MAXIMIZED_BOTH); // FULLSCREEN
+                setLocationRelativeTo(null); // center (opsional tapi aman)
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ 
         setLocationRelativeTo(null);
 
         setDefaultCloseOperation(

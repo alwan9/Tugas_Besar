@@ -8,7 +8,7 @@ public class Customer {
     private String alamat;
 
     public Customer(int customerId, String nama,
-                    String noHp, String alamat) {
+            String noHp, String alamat) {
 
         this.customerId = customerId;
         this.nama = nama;
@@ -30,6 +30,18 @@ public class Customer {
 
     public String getAlamat() {
         return alamat;
+    }
+
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
+
+    public void setNoHp(String noHp) {
+        this.noHp = noHp;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
     }
 
     @Override

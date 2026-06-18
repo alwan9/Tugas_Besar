@@ -9,9 +9,9 @@ public class Order {
     private Invoice invoice;
 
     public Order(int orderId,
-                 Customer customer,
-                 String deskripsi,
-                 String status) {
+            Customer customer,
+            String deskripsi,
+            String status) {
 
         this.orderId = orderId;
         this.customer = customer;
@@ -19,7 +19,7 @@ public class Order {
         this.status = status;
         this.invoice = null;
     }
-
+    
     public int getOrderId() {
         return orderId;
     }
@@ -42,6 +42,10 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setDeskripsi(String deskripsi) {
+        this.deskripsi = deskripsi;
     }
 
     public void setInvoice(Invoice invoice) {

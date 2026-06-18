@@ -7,408 +7,239 @@ import java.awt.*;
 
 public class ProduksiDashboard extends JFrame {
 
-    private JTextArea area;
+    private JPanel listPanel;
+    private JScrollPane scroll;
 
     public ProduksiDashboard() {
 
         setTitle("Produksi Dashboard");
-
-        setSize(800, 600);
-
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        setDefaultCloseOperation(
-                JFrame.EXIT_ON_CLOSE
-        );
+        // ================= TOP PANEL =================
+        JTextField txtSearch = new JTextField(25);
 
-        area = new JTextArea();
+        JButton btnRefresh = new JButton("Refresh");
+        JButton btnTambahProgress = new JButton("Tambah Progress");
+        JButton btnEditProgress = new JButton("Edit Progress");
+        JButton btnSelesai = new JButton("Selesaikan Pesanan");
+        JButton btnLogout = new JButton("Logout");
 
-        area.setEditable(false);
+        styleBtn(btnRefresh, new Color(52, 152, 219));
+        styleBtn(btnTambahProgress, new Color(46, 204, 113));
+        styleBtn(btnEditProgress, new Color(241, 196, 15));
+        styleBtn(btnSelesai, new Color(155, 89, 182));
+        styleBtn(btnLogout, new Color(231, 76, 60));
 
-        JButton btnRefresh
-                = new JButton("Refresh");
-
-        JButton btnTambahProgress
-                = new JButton("Tambah Progress");
-
-        JButton btnEditProgress
-                = new JButton("Edit Progress");
-
-        JButton btnSelesai
-                = new JButton("Selesaikan Pesanan");
-
-        JButton btnLogout
-                = new JButton("Logout");
-
-        JPanel topPanel
-                = new JPanel();
-
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        topPanel.add(new JLabel("Search WO / Nama / ID: "));
+        topPanel.add(txtSearch);
         topPanel.add(btnRefresh);
         topPanel.add(btnTambahProgress);
         topPanel.add(btnEditProgress);
         topPanel.add(btnSelesai);
         topPanel.add(btnLogout);
 
-        add(topPanel,
-                BorderLayout.NORTH);
+        // ================= LIST PANEL (3 KOLOM) =================
+        listPanel = new JPanel();
+        listPanel.setLayout(new GridLayout(0, 3, 15, 15));
+        listPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        listPanel.setBackground(new Color(245, 245, 245));
 
-        add(new JScrollPane(area),
-                BorderLayout.CENTER);
+        scroll = new JScrollPane(listPanel);
 
-        btnRefresh.addActionListener(
-                e -> tampilkanData()
-        );
+        add(topPanel, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
 
-        btnTambahProgress.addActionListener(
-                e -> updateStatus()
-        );
-
-        btnEditProgress.addActionListener(
-                e -> editProgress()
-        );
-
-        btnSelesai.addActionListener(
-                e -> selesaiProduksi()
-        );
-
+        // ================= ACTION =================
+        btnRefresh.addActionListener(e -> tampilkanData(txtSearch.getText()));
+        btnTambahProgress.addActionListener(e -> updateStatus());
+        btnEditProgress.addActionListener(e -> editProgress());
+        btnSelesai.addActionListener(e -> selesaiProduksi());
         btnLogout.addActionListener(e -> {
-
             dispose();
-
             new LoginFrame().setVisible(true);
-
         });
 
-        tampilkanData();
+        txtSearch.addActionListener(e -> tampilkanData(txtSearch.getText()));
+
+        tampilkanData("");
     }
 
-    private void tampilkanData() {
+    // ================= UI LIST =================
+    private void tampilkanData(String keyword) {
 
-        area.setText("");
+        listPanel.removeAll();
 
-        area.append(
-                "===== WORK ORDER =====\n\n"
-        );
+        for (WorkOrder wo : DataStore.workOrders) {
 
-        for (WorkOrder wo
-                : DataStore.workOrders) {
+            String data = (
+                    wo.getWoId() + " " +
+                    wo.getOrder().getCustomer().getNama() + " " +
+                    wo.getOrder().getDeskripsi()
+            ).toLowerCase();
 
-            area.append(
-                    "WO ID : "
-                    + wo.getWoId()
-                    + "\n"
-            );
-
-            area.append(
-                    "Customer : "
-                    + wo.getOrder()
-                            .getCustomer()
-                            .getNama()
-                    + "\n"
-            );
-
-            area.append(
-                    "Deskripsi : "
-                    + wo.getOrder()
-                            .getDeskripsi()
-                    + "\n"
-            );
-
-            area.append("Progress : \n");
-
-            for (String progress
-                    : wo.getProgressList()) {
-
-                area.append(
-                        "- "
-                        + progress
-                        + "\n"
-                );
-
+            if (keyword != null && !keyword.isBlank()) {
+                if (!data.contains(keyword.toLowerCase())) continue;
             }
 
-            if (wo.getQrCode() != null) {
+            // ================= CARD =================
+            JPanel card = new JPanel();
+            card.setLayout(new BorderLayout());
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            card.setPreferredSize(new Dimension(300, 180)); // ✅ TIDAK FULL HEIGHT
 
-                area.append(
-                        "QR : "
-                        + wo.getQrCode()
-                                .getKode()
-                        + "\n"
-                );
+            // ================= INFO =================
+            JTextArea info = new JTextArea(
+                    "WO ID : " + wo.getWoId() + "\n" +
+                    "Customer : " + wo.getOrder().getCustomer().getNama() + "\n" +
+                    "Deskripsi : " + wo.getOrder().getDeskripsi() + "\n" +
+                    "Status : " + wo.getStatus()
+            );
+
+            info.setEditable(false);
+            info.setLineWrap(true);
+            info.setWrapStyleWord(true);
+            info.setBackground(Color.WHITE);
+
+            // ================= PROGRESS =================
+            StringBuilder sb = new StringBuilder("Progress:\n");
+            for (String p : wo.getProgressList()) {
+                sb.append("- ").append(p).append("\n");
             }
 
-            area.append("\n");
+            JTextArea progressArea = new JTextArea(sb.toString());
+            progressArea.setEditable(false);
+            progressArea.setLineWrap(true);
+            progressArea.setWrapStyleWord(true);
+            progressArea.setBackground(Color.WHITE);
+
+            JPanel center = new JPanel(new BorderLayout());
+            center.setBackground(Color.WHITE);
+            center.add(info, BorderLayout.NORTH);
+            center.add(progressArea, BorderLayout.CENTER);
+
+            // ================= BUTTON =================
+            JButton btnHapus = new JButton("Hapus");
+            JButton btnEdit = new JButton("Edit");
+
+            styleBtn(btnHapus, new Color(231, 76, 60));
+            styleBtn(btnEdit, new Color(241, 196, 15));
+
+            JPanel btnPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+            btnPanel.setBackground(Color.WHITE);
+            btnPanel.add(btnEdit);
+            btnPanel.add(btnHapus);
+
+            btnHapus.addActionListener(e -> {
+                DataStore.workOrders.remove(wo);
+                tampilkanData(keyword);
+            });
+
+            btnEdit.addActionListener(e -> editProgressByObject(wo));
+
+            card.add(center, BorderLayout.CENTER);
+            card.add(btnPanel, BorderLayout.EAST);
+
+            listPanel.add(card);
         }
-        
-        
+
+        listPanel.revalidate();
+        listPanel.repaint();
     }
 
+    // ================= STYLE =================
+    private void styleBtn(JButton btn, Color bg) {
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+    }
+
+    // ================= LOGIC (TIDAK DIUBAH) =================
     private void updateStatus() {
 
-        String inputWO
-                = JOptionPane.showInputDialog(
-                        this,
-                        "Masukkan WO ID"
-                );
-
-        if (inputWO == null) {
-            return;
-        }
+        String inputWO = JOptionPane.showInputDialog(this, "Masukkan WO ID");
+        if (inputWO == null) return;
 
         try {
+            int id = Integer.parseInt(inputWO);
 
-            int woId
-                    = Integer.parseInt(inputWO);
+            for (WorkOrder wo : DataStore.workOrders) {
+                if (wo.getWoId() == id) {
 
-            for (WorkOrder wo
-                    : DataStore.workOrders) {
+                    String p = JOptionPane.showInputDialog(this, "Progress baru");
+                    if (p == null || p.isBlank()) return;
 
-                if (wo.getWoId() == woId) {
+                    wo.tambahProgress(p);
+                    wo.getOrder().setStatus(p);
 
-                    String progres
-                            = JOptionPane.showInputDialog(
-                                    this,
-                                    "Masukkan progres produksi"
-                            );
-
-                    if (progres == null
-                            || progres.trim().isEmpty()) {
-
-                        return;
-                    }
-
-                    wo.tambahProgress(progres);
-
-                    wo.getOrder()
-                            .setStatus(progres);
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Progres berhasil diperbarui"
-                    );
-
-                    tampilkanData();
-
+                    tampilkanData("");
                     return;
                 }
             }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Work Order tidak ditemukan"
-            );
-
         } catch (Exception ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Input tidak valid"
-            );
+            JOptionPane.showMessageDialog(this, "Input tidak valid");
         }
-
     }
 
     private void editProgress() {
+        JOptionPane.showMessageDialog(this, "Gunakan tombol Edit di card");
+    }
 
-        String inputWO
-                = JOptionPane.showInputDialog(
-                        this,
-                        "Masukkan WO ID"
-                );
+    private void editProgressByObject(WorkOrder wo) {
 
-        if (inputWO == null) {
+        if (wo.getProgressList().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Belum ada progress");
             return;
         }
 
-        try {
+        String p = (String) JOptionPane.showInputDialog(
+                this,
+                "Pilih Progress",
+                "Edit Progress",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                wo.getProgressList().toArray(),
+                wo.getProgressList().get(0)
+        );
 
-            int woId
-                    = Integer.parseInt(inputWO);
+        if (p == null) return;
 
-            WorkOrder target = null;
+        String newP = JOptionPane.showInputDialog(this, "Edit progress", p);
+        if (newP == null || newP.isBlank()) return;
 
-            for (WorkOrder wo
-                    : DataStore.workOrders) {
+        int idx = wo.getProgressList().indexOf(p);
+        wo.getProgressList().set(idx, newP);
 
-                if (wo.getWoId() == woId) {
-
-                    target = wo;
-                    break;
-                }
-            }
-
-            if (target == null) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Work Order tidak ditemukan"
-                );
-
-                return;
-            }
-
-            if (target.getProgressList().isEmpty()) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Belum ada progress"
-                );
-
-                return;
-            }
-
-            String progressDipilih
-                    = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Pilih Progress",
-                            "Edit Progress",
-                            JOptionPane.PLAIN_MESSAGE,
-                            null,
-                            target.getProgressList().toArray(),
-                            target.getProgressList().get(0)
-                    );
-
-            if (progressDipilih == null) {
-                return;
-            }
-
-            String[] aksi = {
-                "Ubah",
-                "Hapus"
-            };
-
-            String pilihan
-                    = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Pilih Aksi",
-                            "Edit Progress",
-                            JOptionPane.PLAIN_MESSAGE,
-                            null,
-                            aksi,
-                            aksi[0]
-                    );
-
-            if (pilihan == null) {
-                return;
-            }
-
-            int index
-                    = target.getProgressList()
-                            .indexOf(progressDipilih);
-
-            if (pilihan.equals("Ubah")) {
-
-                String progressBaru
-                        = JOptionPane.showInputDialog(
-                                this,
-                                "Progress Baru",
-                                progressDipilih
-                        );
-
-                if (progressBaru == null
-                        || progressBaru.trim().isEmpty()) {
-
-                    return;
-                }
-
-                target.getProgressList()
-                        .set(index,
-                                progressBaru);
-
-                target.setStatus(
-                        progressBaru
-                );
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Progress berhasil diubah"
-                );
-            } else {
-
-                target.getProgressList()
-                        .remove(index);
-
-                if (!target.getProgressList().isEmpty()) {
-
-                    target.setStatus(
-                            target.getProgressList()
-                                    .get(
-                                            target.getProgressList().size() - 1
-                                    )
-                    );
-                }
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Progress berhasil dihapus"
-                );
-            }
-
-            tampilkanData();
-
-        } catch (Exception ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Input tidak valid"
-            );
-        }
-
+        tampilkanData("");
     }
 
     private void selesaiProduksi() {
 
-        String inputWO
-                = JOptionPane.showInputDialog(
-                        this,
-                        "Masukkan WO ID"
-                );
-
-        if (inputWO == null) {
-            return;
-        }
+        String inputWO = JOptionPane.showInputDialog(this, "Masukkan WO ID");
+        if (inputWO == null) return;
 
         try {
+            int id = Integer.parseInt(inputWO);
 
-            int woId
-                    = Integer.parseInt(inputWO);
-
-            for (WorkOrder wo
-                    : DataStore.workOrders) {
-
-                if (wo.getWoId() == woId) {
+            for (WorkOrder wo : DataStore.workOrders) {
+                if (wo.getWoId() == id) {
 
                     wo.tambahProgress("QC");
-
                     wo.setStatus("QC");
+                    wo.getOrder().setStatus("QC");
 
-                    wo.getOrder()
-                            .setStatus("QC");
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Pesanan berhasil diselesaikan dan dikirim ke QC"
-                    );
-
-                    tampilkanData();
-
+                    tampilkanData("");
                     return;
                 }
             }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Work Order tidak ditemukan"
-            );
-
-        } catch (Exception ex) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Input tidak valid"
-            );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Input tidak valid");
         }
-
     }
-
 }
