@@ -1,5 +1,7 @@
 package model;
 
+import java.util.HashMap;
+
 import java.util.ArrayList;
 
 public class DataStore {
@@ -9,6 +11,9 @@ public class DataStore {
 
     public static ArrayList<Customer> customers
             = new ArrayList<>();
+
+    public static HashMap<Integer, Customer> customerMap
+            = new HashMap<>();
 
     public static ArrayList<Order> orders
             = new ArrayList<>();
@@ -38,16 +43,7 @@ public class DataStore {
     }
 
     public static Customer cariCustomer(int id) {
-
-        for (Customer c : customers) {
-
-            if (c.getCustomerId() == id) {
-
-                return c;
-            }
-        }
-
-        return null;
+        return customerMap.get(id);
     }
 
     public static void initData() {

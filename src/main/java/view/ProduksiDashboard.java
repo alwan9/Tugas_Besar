@@ -22,13 +22,11 @@ public class ProduksiDashboard extends JFrame {
 
         JButton btnRefresh = new JButton("Refresh");
         JButton btnTambahProgress = new JButton("Tambah Progress");
-        JButton btnEditProgress = new JButton("Edit Progress");
         JButton btnSelesai = new JButton("Selesaikan Pesanan");
         JButton btnLogout = new JButton("Logout");
 
         styleBtn(btnRefresh, new Color(52, 152, 219));
         styleBtn(btnTambahProgress, new Color(46, 204, 113));
-        styleBtn(btnEditProgress, new Color(241, 196, 15));
         styleBtn(btnSelesai, new Color(155, 89, 182));
         styleBtn(btnLogout, new Color(231, 76, 60));
 
@@ -37,7 +35,6 @@ public class ProduksiDashboard extends JFrame {
         topPanel.add(txtSearch);
         topPanel.add(btnRefresh);
         topPanel.add(btnTambahProgress);
-        topPanel.add(btnEditProgress);
         topPanel.add(btnSelesai);
         topPanel.add(btnLogout);
 
@@ -55,7 +52,6 @@ public class ProduksiDashboard extends JFrame {
         // ================= ACTION =================
         btnRefresh.addActionListener(e -> tampilkanData(txtSearch.getText()));
         btnTambahProgress.addActionListener(e -> updateStatus());
-        btnEditProgress.addActionListener(e -> editProgress());
         btnSelesai.addActionListener(e -> selesaiProduksi());
         btnLogout.addActionListener(e -> {
             dispose();
@@ -74,14 +70,14 @@ public class ProduksiDashboard extends JFrame {
 
         for (WorkOrder wo : DataStore.workOrders) {
 
-            String data = (
-                    wo.getWoId() + " " +
-                    wo.getOrder().getCustomer().getNama() + " " +
-                    wo.getOrder().getDeskripsi()
-            ).toLowerCase();
+            String data = (wo.getWoId() + " "
+                    + wo.getOrder().getCustomer().getNama() + " "
+                    + wo.getOrder().getDeskripsi()).toLowerCase();
 
             if (keyword != null && !keyword.isBlank()) {
-                if (!data.contains(keyword.toLowerCase())) continue;
+                if (!data.contains(keyword.toLowerCase())) {
+                    continue;
+                }
             }
 
             // ================= CARD =================
@@ -93,10 +89,10 @@ public class ProduksiDashboard extends JFrame {
 
             // ================= INFO =================
             JTextArea info = new JTextArea(
-                    "WO ID : " + wo.getWoId() + "\n" +
-                    "Customer : " + wo.getOrder().getCustomer().getNama() + "\n" +
-                    "Deskripsi : " + wo.getOrder().getDeskripsi() + "\n" +
-                    "Status : " + wo.getStatus()
+                    "WO ID : " + wo.getWoId() + "\n"
+                    + "Customer : " + wo.getOrder().getCustomer().getNama() + "\n"
+                    + "Deskripsi : " + wo.getOrder().getDeskripsi() + "\n"
+                    + "Status : " + wo.getStatus()
             );
 
             info.setEditable(false);
@@ -122,23 +118,20 @@ public class ProduksiDashboard extends JFrame {
             center.add(progressArea, BorderLayout.CENTER);
 
             // ================= BUTTON =================
-            JButton btnHapus = new JButton("Hapus");
-            JButton btnEdit = new JButton("Edit");
+            JButton btnEdit = new JButton("Edit Progress");
+            JButton btnHapusProgress = new JButton("Hapus Progress");
 
-            styleBtn(btnHapus, new Color(231, 76, 60));
             styleBtn(btnEdit, new Color(241, 196, 15));
+            styleBtn(btnHapusProgress, new Color(231, 76, 60));
 
             JPanel btnPanel = new JPanel(new GridLayout(2, 1, 5, 5));
             btnPanel.setBackground(Color.WHITE);
             btnPanel.add(btnEdit);
-            btnPanel.add(btnHapus);
-
-            btnHapus.addActionListener(e -> {
-                DataStore.workOrders.remove(wo);
-                tampilkanData(keyword);
-            });
+            btnPanel.add(btnHapusProgress);
 
             btnEdit.addActionListener(e -> editProgressByObject(wo));
+            btnHapusProgress.addActionListener(
+                    e -> hapusProgressByObject(wo));
 
             card.add(center, BorderLayout.CENTER);
             card.add(btnPanel, BorderLayout.EAST);
@@ -162,16 +155,25 @@ public class ProduksiDashboard extends JFrame {
     private void updateStatus() {
 
         String inputWO = JOptionPane.showInputDialog(this, "Masukkan WO ID");
-        if (inputWO == null) return;
+        if (inputWO == null) {
+            return;
+        }
 
         try {
+
             int id = Integer.parseInt(inputWO);
+            boolean ditemukan = false;
 
             for (WorkOrder wo : DataStore.workOrders) {
+
                 if (wo.getWoId() == id) {
 
+                    ditemukan = true;
+
                     String p = JOptionPane.showInputDialog(this, "Progress baru");
-                    if (p == null || p.isBlank()) return;
+                    if (p == null || p.isBlank()) {
+                        return;
+                    }
 
                     wo.tambahProgress(p);
                     wo.getOrder().setStatus(p);
@@ -179,6 +181,13 @@ public class ProduksiDashboard extends JFrame {
                     tampilkanData("");
                     return;
                 }
+            }
+
+            if (!ditemukan) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "ID Work Order tidak ditemukan!"
+                );
             }
 
         } catch (Exception ex) {
@@ -207,10 +216,14 @@ public class ProduksiDashboard extends JFrame {
                 wo.getProgressList().get(0)
         );
 
-        if (p == null) return;
+        if (p == null) {
+            return;
+        }
 
         String newP = JOptionPane.showInputDialog(this, "Edit progress", p);
-        if (newP == null || newP.isBlank()) return;
+        if (newP == null || newP.isBlank()) {
+            return;
+        }
 
         int idx = wo.getProgressList().indexOf(p);
         wo.getProgressList().set(idx, newP);
@@ -218,24 +231,89 @@ public class ProduksiDashboard extends JFrame {
         tampilkanData("");
     }
 
+    private void hapusProgressByObject(WorkOrder wo) {
+
+        if (wo.getProgressList().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Belum ada progress"
+            );
+
+            return;
+        }
+
+        String progress = (String) JOptionPane.showInputDialog(
+                this,
+                "Pilih Progress yang akan dihapus",
+                "Hapus Progress",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                wo.getProgressList().toArray(),
+                wo.getProgressList().get(0)
+        );
+
+        if (progress == null) {
+            return;
+        }
+
+        int konfirmasi = JOptionPane.showConfirmDialog(
+                this,
+                "Yakin ingin menghapus progress:\n" + progress + "?",
+                "Konfirmasi",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (konfirmasi == JOptionPane.YES_OPTION) {
+
+            wo.getProgressList().remove(progress);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Progress berhasil dihapus"
+            );
+
+            tampilkanData("");
+        }
+    }
+
     private void selesaiProduksi() {
 
         String inputWO = JOptionPane.showInputDialog(this, "Masukkan WO ID");
-        if (inputWO == null) return;
+        if (inputWO == null) {
+            return;
+        }
 
         try {
+
             int id = Integer.parseInt(inputWO);
+            boolean ditemukan = false;
 
             for (WorkOrder wo : DataStore.workOrders) {
+
                 if (wo.getWoId() == id) {
+
+                    ditemukan = true;
 
                     wo.tambahProgress("QC");
                     wo.setStatus("QC");
                     wo.getOrder().setStatus("QC");
 
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Pesanan berhasil masuk tahap QC"
+                    );
+
                     tampilkanData("");
                     return;
                 }
+            }
+
+            if (!ditemukan) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "ID Work Order tidak ditemukan!"
+                );
             }
 
         } catch (Exception e) {

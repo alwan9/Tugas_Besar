@@ -126,6 +126,11 @@ public class MarketingDashboard extends JFrame {
 
                 DataStore.customers.add(customer);
 
+                DataStore.customerMap.put(
+                        customer.getCustomerId(),
+                        customer
+                );
+
                 Order order = new Order(
                         DataStore.generateOrderId(),
                         customer,

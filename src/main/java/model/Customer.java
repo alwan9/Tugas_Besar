@@ -7,13 +7,25 @@ public class Customer {
     private String noHp;
     private String alamat;
 
-    public Customer(int customerId, String nama,
-            String noHp, String alamat) {
+    public Customer(
+            int customerId,
+            String nama,
+            String noHp,
+            String alamat) {
 
         this.customerId = customerId;
         this.nama = nama;
         this.noHp = noHp;
         this.alamat = alamat;
+    }
+
+    public Customer(String nama) {
+        this.nama = nama;
+    }
+
+    public Customer(String nama, String noHp) {
+        this.nama = nama;
+        this.noHp = noHp;
     }
 
     public int getCustomerId() {
@@ -45,7 +57,24 @@ public class Customer {
     }
 
     @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Customer)) {
+            return false;
+        }
+
+        Customer other = (Customer) obj;
+
+        return this.customerId == other.customerId;
+    }
+
+    @Override
     public String toString() {
         return customerId + " - " + nama;
     }
+
 }
