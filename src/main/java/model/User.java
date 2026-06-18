@@ -1,6 +1,6 @@
 package model;
 
-public class User {
+public abstract class User {
 
     protected int userId;
     protected String nama;
@@ -43,4 +43,6 @@ public class User {
     public String getRole() {
         return role;
     }
+
+    public abstract String dashboardName();
 }

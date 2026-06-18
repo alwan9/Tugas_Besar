@@ -2,18 +2,22 @@ package model;
 
 public class Produksi extends User {
 
-public Produksi(int userId,
-                String nama,
-                String username,
-                String password) {
+        @Override
+        public String dashboardName() {
+                return "Produksi Dashboard";
+        }
 
-    super(
-            userId,
-            nama,
-            username,
-            password,
-            "Produksi"
-    );
-}
+        public Produksi(int userId,
+                        String nama,
+                        String username,
+                        String password) {
+
+                super(
+                                userId,
+                                nama,
+                                username,
+                                password,
+                                "Produksi");
+        }
 
 }
