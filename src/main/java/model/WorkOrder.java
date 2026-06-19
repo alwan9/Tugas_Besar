@@ -46,8 +46,12 @@ public class WorkOrder implements Trackable {
 
     public void tambahProgress(String progress) {
 
-        progressList.add(progress);
+        if (status.equalsIgnoreCase("QC")) {
+            throw new IllegalStateException(
+                    "Progress tidak dapat ditambahkan karena status sudah QC.");
+        }
 
+        progressList.add(progress);
         status = progress;
     }
 

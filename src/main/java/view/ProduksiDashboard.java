@@ -124,6 +124,15 @@ public class ProduksiDashboard extends JFrame {
             styleBtn(btnEdit, new Color(241, 196, 15));
             styleBtn(btnHapusProgress, new Color(231, 76, 60));
 
+            if (wo.getStatus().equalsIgnoreCase("QC")) {
+
+                btnEdit.setEnabled(false);
+                btnHapusProgress.setEnabled(false);
+
+                btnEdit.setBackground(Color.LIGHT_GRAY);
+                btnHapusProgress.setBackground(Color.LIGHT_GRAY);
+            }
+
             JPanel btnPanel = new JPanel(new GridLayout(2, 1, 5, 5));
             btnPanel.setBackground(Color.WHITE);
             btnPanel.add(btnEdit);
@@ -170,13 +179,39 @@ public class ProduksiDashboard extends JFrame {
 
                     ditemukan = true;
 
+                    if (wo.getStatus().equalsIgnoreCase("QC")) {
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Work Order sudah berada pada tahap QC dan tidak dapat ditambah progress lagi."
+                        );
+
+                        return;
+                    }
+
                     String p = JOptionPane.showInputDialog(this, "Progress baru");
+
                     if (p == null || p.isBlank()) {
                         return;
                     }
 
-                    wo.tambahProgress(p);
-                    wo.getOrder().setStatus(p);
+                    try {
+
+                        wo.tambahProgress(p);
+                        wo.getOrder().setStatus(p);
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Progress berhasil ditambahkan"
+                        );
+
+                    } catch (IllegalStateException ex) {
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                ex.getMessage()
+                        );
+                    }
 
                     tampilkanData("");
                     return;
@@ -200,6 +235,16 @@ public class ProduksiDashboard extends JFrame {
     }
 
     private void editProgressByObject(WorkOrder wo) {
+
+        if (wo.getStatus().equalsIgnoreCase("QC")) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Progress tidak dapat diedit karena Work Order sudah tahap QC."
+            );
+
+            return;
+        }
 
         if (wo.getProgressList().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Belum ada progress");
@@ -232,6 +277,16 @@ public class ProduksiDashboard extends JFrame {
     }
 
     private void hapusProgressByObject(WorkOrder wo) {
+
+        if (wo.getStatus().equalsIgnoreCase("QC")) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Progress tidak dapat dihapus karena Work Order sudah tahap QC."
+            );
+
+            return;
+        }
 
         if (wo.getProgressList().isEmpty()) {
 

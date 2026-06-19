@@ -284,13 +284,26 @@ public class AdminDashboard extends JFrame {
                             BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                             BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
+            String tracking = "-";
+
+            for (WorkOrder wo : DataStore.workOrders) {
+
+                if (wo.getOrder().getOrderId() == order.getOrderId()
+                        && wo.getQrCode() != null) {
+
+                    tracking = wo.getQrCode().getKode();
+                    break;
+                }
+            }
+
             JTextArea info = new JTextArea(
                     "ID : " + order.getOrderId()
                     + "\nNama : " + order.getCustomer().getNama()
                     + "\nNo HP : " + order.getCustomer().getNoHp()
                     + "\nAlamat : " + order.getCustomer().getAlamat()
                     + "\nDeskripsi : " + order.getDeskripsi()
-                    + "\nStatus : " + order.getStatus());
+                    + "\nStatus : " + order.getStatus()
+                    + "\nTracking : " + tracking);
 
             info.setEditable(false);
             info.setBackground(card.getBackground());
@@ -436,6 +449,7 @@ public class AdminDashboard extends JFrame {
 
             JTextArea info = new JTextArea(
                     "WO ID : " + wo.getWoId()
+                    + "\nOrder ID : " + wo.getOrder().getOrderId()
                     + "\nCustomer : "
                     + wo.getOrder().getCustomer().getNama()
                     + "\nStatus : "
